@@ -13,34 +13,39 @@ Load a specialized agent role definition and provide full project context.
 
 **Requested role:** `$1`
 
-**Context directory:** !`if [ -d "context/roles" ]; then echo "context"; else find . -maxdepth 2 -type d -name "roles" -path "*/roles" 2>/dev/null | head -1 | xargs dirname 2>/dev/null || echo "NOT_FOUND"; fi`
-
-**Available roles:** !`CONTEXT_DIR=$(if [ -d "context/roles" ]; then echo "context"; else find . -maxdepth 2 -type d -name "roles" -path "*/roles" 2>/dev/null | head -1 | xargs dirname 2>/dev/null; fi); if [ -n "$CONTEXT_DIR" ] && [ -d "$CONTEXT_DIR/roles" ]; then ls -1 "$CONTEXT_DIR/roles/"role-*.md 2>/dev/null | xargs -n1 basename | sed 's/role-//;s/.md$//' || echo "NONE"; else echo "NO_CONTEXT_DIR"; fi`
-
 ## Instructions
 
-### 1. Handle List Command
+### 1. Find Context Directory and Available Roles
 
-If `$1` is "list", "ls", or empty, display the available roles and exit:
+Use Glob to find role files: `**/roles/role-*.md` (max depth 3)
+
+From the results:
+- Extract the context directory path (parent of `roles/`)
+- Extract role names by removing `role-` prefix and `.md` suffix
+- If no roles found, display: "❌ No context directory found. Run /init-context first." and exit
+
+### 2. Handle List Command
+
+If `$1` is "list", "ls", or empty:
+- For each role file found, read it and extract the "Primary Responsibility:" line
+- Display the available roles with their descriptions:
 
 ```
 📋 Available roles:
 
-[Format the available roles list above as bullet points]
+  architect - Design system architecture and make structural decisions
+  debugger - Diagnose and fix bugs systematically
+  devops - Manage infrastructure, deployments, and operations
+  ...
 
 Usage: /role <role-name>
 ```
 
 Then stop - do not load any role.
 
-### 2. Validate Context Directory
-
-Check if the context directory was found:
-- If it shows "NOT_FOUND" or "NO_CONTEXT_DIR", display: "❌ No context directory found. Run /init-context first." and exit.
-
 ### 3. Validate Role Exists
 
-Check if the requested role (`$1`) appears in the available roles list:
+Check if the requested role (`$1`) exists in the available roles:
 - If not found, display an error with the available roles list and exit
 - Build the role file path: `{CONTEXT_DIR}/roles/role-{$1}.md`
 
