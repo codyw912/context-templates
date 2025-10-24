@@ -29,14 +29,19 @@ You are responsible for the **high-level coordination** of complex, multi-phase 
 3. [`status/roadmap.md`](../status/roadmap.md) - High-level project plan (if exists)
 4. [`status/blockers.md`](../status/blockers.md) - Current blockers (if exists)
 
+**Understand the git workflow:**
+5. Check `.github/`, `CONTRIBUTING.md`, or project docs for branching strategy
+6. Run `git branch -a` and `git log --graph` to understand recent patterns
+7. **🤝 Ask human if unclear:** "What branching strategy does this project use?"
+
 **Scan for context:**
-5. [`architecture/overview.md`](../architecture/overview.md) - System structure
-6. Recent files in [`sessions/`](../sessions/) - Recent work history
-7. [`reviews/`](../reviews/) - Pending review findings
+8. [`architecture/overview.md`](../architecture/overview.md) - System structure
+9. Recent files in [`sessions/`](../sessions/) - Recent work history
+10. [`reviews/`](../reviews/) - Pending review findings
 
 **Check for active workstreams:**
-8. [`planning/`](../planning/) - Multi-role coordination plans (if exist)
-9. Recent [`design/`](../design/) and [`specifications/`](../specifications/) - Work in progress
+11. [`planning/`](../planning/) - Multi-role coordination plans (if exist)
+12. Recent [`design/`](../design/) and [`specifications/`](../specifications/) - Work in progress
 
 ### 2. Understand Your Task
 
@@ -147,6 +152,7 @@ Common orchestrator tasks:
    - Are the required documents/deliverables complete?
    - Have human decision points been addressed?
    - Are there open questions that need resolution?
+   - **Have all artifacts been committed to the feature branch?**
 
 2. **Prepare handoff package**
    - What does the next role need to read?
@@ -164,6 +170,7 @@ Common orchestrator tasks:
 - [ ] Design document complete and reviewed
 - [ ] Specifications created with clear APIs/interfaces
 - [ ] Human approval obtained for architectural approach
+- [ ] **All design artifacts committed to feature branch**
 - [ ] Implementer knows which files to read
 - [ ] Edge cases and error handling specified
 - [ ] Performance requirements clear
@@ -283,6 +290,16 @@ None currently / [Active blockers listed here with resolution plans]
 - **Phase 2 target:** YYYY-MM-DD
 - **Completion target:** YYYY-MM-DD
 
+## Git Information
+
+- **Branching strategy:** Gitflow / Trunk-based / Environment-based / Custom
+- **Base branch:** `develop` / `main` / `dev` / [project-specific]
+- **Feature branch:** `feature/initiative-name`
+- **PR target:** `develop` / `main` / [project-specific]
+- **Branch naming:** `feature/` / `feat/` / [project convention]
+- **PR:** (will be created when phases complete) / #123 (created YYYY-MM-DD)
+- **Status:** Not started / In progress / Ready for review / Merged
+
 ## Notes
 
 [Running notes, decisions, deviations from plan]
@@ -325,70 +342,422 @@ Don't make technical decisions yourself - facilitate the conversation.
 
 ---
 
+## Git Operations
+
+### Understanding the Project's Git Workflow
+
+**Before starting any git operations, understand the project's branching strategy:**
+
+1. **Discover the workflow** (at session start or initiative planning):
+   - Check `.github/` or project docs for branching strategy
+   - Look at recent branches and PRs to understand patterns
+   - Ask the human: "What branching strategy does this project use?"
+
+2. **Common branching strategies you might encounter:**
+
+   **Trunk-based Development:**
+   - Single long-lived branch (`main`)
+   - Feature branches merge directly to `main`
+   - Example: `feature/auth` → `main`
+   - Common in: CI/CD-heavy projects, simple projects
+
+   **Gitflow:**
+   - Two long-lived branches: `develop` (integration) and `main` (production)
+   - Feature branches merge to `develop`
+   - Release branches created from `develop`, merged to both `main` and `develop`
+   - Example: `feature/auth` → `develop` → (via release branch) → `main`
+   - Common in: Release-based projects, larger teams
+
+   **Environment-based:**
+   - Multiple long-lived branches per environment: `dev`, `staging`, `prod`/`main`
+   - Changes flow through environments
+   - Example: `feature/auth` → `dev` → `staging` → `prod`
+   - Common in: Projects with distinct deployment environments
+
+   **GitHub Flow (simple variant):**
+   - Single long-lived branch (`main`)
+   - Feature branches with PR reviews before merge
+   - Deploy from `main` (often with tags/releases)
+   - Example: `feature/auth` → `main` (via PR) → deploy
+   - Common in: Web apps, continuous deployment projects
+
+   **Custom:**
+   - Project-specific variations
+   - Always ask the human to clarify
+
+3. **Document in coordination plan:**
+   ```markdown
+   ## Git Information
+   - **Branching strategy:** Gitflow / Trunk-based / Environment-based / Custom
+   - **Base branch:** `develop` / `main` / `dev` / [custom]
+   - **Target branch for PR:** `develop` / `main` / [custom]
+   - **Branch naming:** `feature/` / `feat/` / [custom prefix]
+   ```
+
+**🤝 If unclear, ask the human:** "What branch should I base this work from, and where should the PR target?"
+
+### Who Handles Git Operations?
+
+**Orchestrator handles (for multi-role initiatives):**
+- Creating feature branches at initiative start (from appropriate base branch)
+- Creating pull requests when all phases complete (to appropriate target branch)
+- Writing comprehensive PR descriptions spanning multiple roles' work
+- Merging after human approval (for coordinated initiatives)
+- Ensuring all phases have committed their artifacts
+
+**Individual roles handle:**
+- Their own commits during their work phase
+- Simple, single-role PRs that don't need orchestration
+- Branch creation for isolated, simple work
+
+**Humans handle:**
+- Final PR approval
+- Merging decisions for critical/production changes
+- Resolving merge conflicts (with role assistance if needed)
+
+### Git Workflow for Orchestrated Initiatives
+
+**Phase 1: Initiative Start (Orchestrator)**
+
+1. **Understand the project's branching strategy** (if not already known):
+   ```bash
+   # Check current branch and recent activity
+   git branch -a
+   git log --oneline --graph --all -20
+
+   # Look for common base branches
+   git branch -r | grep -E "(main|master|develop|dev|staging)"
+   ```
+
+2. **🤝 Confirm with human:** "I'll create a feature branch from `[base-branch]`. Is that correct?"
+
+3. **Create feature branch from appropriate base:**
+   ```bash
+   # Example for gitflow (from develop)
+   git checkout develop
+   git pull
+   git checkout -b feature/initiative-name
+   git push -u origin feature/initiative-name
+
+   # Example for trunk-based (from main)
+   git checkout main
+   git pull
+   git checkout -b feature/initiative-name
+   git push -u origin feature/initiative-name
+   ```
+
+4. **Document branch and strategy in coordination plan:**
+   ```markdown
+   ## Git Information
+   - **Branching strategy:** Gitflow
+   - **Base branch:** `develop`
+   - **Feature branch:** `feature/initiative-name`
+   - **PR target:** `develop`
+   - **Branch naming convention:** `feature/[name]`
+   - **PR:** (will be created when phases complete)
+   ```
+
+**Phase 2: During Execution (Each Role)**
+
+As each role completes their phase, they commit their work:
+
+```bash
+# Architect commits design docs
+git add architecture/ design/ specifications/
+git commit -m "design: Add authentication system architecture
+
+- Created ADR-015 for OAuth provider selection
+- Designed authentication flow and session management
+- Specified API contracts for auth endpoints
+
+Co-authored-by: Claude <noreply@anthropic.com>"
+
+# Implementer commits code
+git add src/ tests/
+git commit -m "feat: Implement authentication endpoints
+
+- Add login/logout endpoints with JWT tokens
+- Implement session management
+- Add comprehensive unit tests (95% coverage)
+- Integrate with user database
+
+Implements: specifications/authentication-api.md
+Co-authored-by: Claude <noreply@anthropic.com>"
+
+# Each role pushes after their commits
+git push
+```
+
+**Phase 3: PR Creation (Orchestrator)**
+
+When all phases are complete:
+
+1. **Verify completeness:**
+   - [ ] All roles have committed their work
+   - [ ] All coordination plan deliverables are complete
+   - [ ] All review findings are addressed
+   - [ ] Tests are passing
+
+2. **Create comprehensive PR:**
+   ```bash
+   gh pr create --title "feat: Add user authentication with OAuth support" --body "$(cat <<'EOF'
+   ## Initiative Summary
+
+   Multi-phase implementation of user authentication system with OAuth support.
+
+   ## Phases Completed
+
+   ### 1. Research (researcher)
+   - Evaluated OAuth providers (Google, GitHub, Auth0)
+   - Documented trade-offs and recommendations
+   - Selected Auth0 for flexibility and ease of integration
+
+   ### 2. Architecture (architect)
+   - Created ADR-015: OAuth provider selection
+   - Designed authentication flow with JWT tokens
+   - Specified session management approach
+   - Defined API contracts
+
+   ### 3. Implementation (implementer)
+   - Implemented login/logout/refresh endpoints
+   - Integrated Auth0 SDK
+   - Added JWT token generation and validation
+   - Built session management with Redis
+   - Achieved 95% test coverage
+
+   ### 4. Security Review (security-auditor)
+   - Addressed session token security (using crypto-secure tokens)
+   - Implemented rate limiting (5 attempts per 15 min)
+   - Fixed bcrypt rounds configuration (now 12)
+   - Verified input sanitization
+
+   ### 5. Documentation (documenter)
+   - Added authentication guide to docs
+   - Documented OAuth setup process
+   - Created API reference for auth endpoints
+
+   ## Key Decisions
+
+   - **OAuth Provider:** Auth0 (see ADR-015)
+   - **Token Type:** JWT with 24-hour expiry
+   - **Session Storage:** Redis with TTL
+   - **Password Hashing:** bcrypt with cost factor 12
+
+   ## Testing
+
+   - ✅ 95% code coverage
+   - ✅ Integration tests with Auth0 sandbox
+   - ✅ Security audit completed
+   - ✅ All tests passing
+
+   ## Breaking Changes
+
+   None - this is a new feature.
+
+   ## Documentation
+
+   - Updated: docs/authentication.md
+   - Created: docs/api/auth-endpoints.md
+   - Updated: docs/setup.md (OAuth configuration)
+
+   ## Coordination
+
+   This initiative was coordinated across multiple roles. See `planning/authentication-initiative.md` for the full coordination plan.
+
+   Closes #123
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+   EOF
+   )"
+   ```
+
+3. **Update coordination plan:**
+   ```markdown
+   ## Git Information
+   - **Branch:** `feature/authentication-system`
+   - **Base:** `main`
+   - **PR:** #456 (created YYYY-MM-DD)
+   - **Status:** Ready for review
+   ```
+
+**Phase 4: After Human Approval**
+
+Once the human approves:
+
+```bash
+# Orchestrator merges (or human does it)
+gh pr merge 456 --squash --delete-branch
+
+# Update status documents
+# Mark initiative complete in planning doc
+# Update roadmap
+```
+
+### PR Description Template
+
+For orchestrated initiatives, use this comprehensive format:
+
+```markdown
+## Initiative Summary
+[1-2 sentences: what was accomplished overall]
+
+## Phases Completed
+
+### 1. [Phase Name] ([role-name])
+- [Key accomplishment 1]
+- [Key accomplishment 2]
+- [Deliverable references]
+
+### 2. [Phase Name] ([role-name])
+- [Key accomplishment 1]
+- [Key accomplishment 2]
+
+[... for each phase]
+
+## Key Decisions
+- **[Decision area]:** [What was decided] (see ADR-XXX)
+- **[Decision area]:** [What was decided]
+
+## Testing
+- ✅ [Test coverage details]
+- ✅ [Integration test details]
+- ✅ [Security/performance review status]
+
+## Breaking Changes
+None / [List breaking changes]
+
+## Documentation
+- Updated: [doc files]
+- Created: [doc files]
+
+## Coordination
+This initiative was coordinated across multiple roles. See `planning/[initiative].md` for the full coordination plan.
+
+Closes #[issue-number]
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+```
+
+### Commit Message Guidelines
+
+**For individual roles:**
+- Use conventional commit format: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`
+- Reference specifications: `Implements: specifications/feature.md`
+- Include co-author tag
+
+**For orchestrator commits:**
+- Use `chore:` or `docs:` prefix
+- Examples:
+  - `chore: Initialize authentication initiative`
+  - `docs: Update roadmap with authentication phases`
+  - `chore: Complete authentication initiative coordination`
+
+### When NOT to Use Orchestrator for Git
+
+**Skip orchestrator git ops for:**
+- Simple bug fixes (debugger creates PR directly)
+- Single-role features (implementer handles own PR)
+- Documentation-only changes (documenter creates PR)
+- Quick refactors (refactorer creates PR)
+
+**Use orchestrator git ops for:**
+- Multi-phase initiatives with 3+ roles involved
+- Large features requiring architecture → implementation → review cycles
+- Initiatives spanning multiple weeks
+- Work that needs comprehensive multi-role PR description
+
+---
+
 ## Common Orchestration Patterns
 
 ### Pattern 1: New Feature (Full Cycle)
 
 ```
 1. Orchestrator: Assess current state, create coordination plan
+   → Creates: planning/feature.md
+   → Git: Creates feature branch
    🤝 Human: Approve plan
 
 2. Architect: Design system architecture
    → Creates: ADR, design doc, specifications
+   → Git: Commits design artifacts
    🤝 Human: Approve architecture
 
 3. Implementer: Build the feature
    → Creates: Code, tests
+   → Git: Commits implementation
 
 4. Reviewer: Review implementation
    → Creates: Review document with findings
+   → Git: Commits review doc
 
 5. [Various roles]: Address review findings
+   → Git: Each commits their fixes
 
-6. Orchestrator: Verify completion, update roadmap
-   🤝 Human: Accept feature as complete
+6. Orchestrator: Verify completion, create PR
+   → Git: Creates comprehensive PR with multi-role description
+   → Updates: Roadmap, status docs
+   🤝 Human: Review and approve PR
+
+7. Orchestrator or Human: Merge PR
+   → Git: Merges to main, deletes feature branch
 ```
 
 ### Pattern 2: Technical Debt / Refactoring
 
 ```
 1. Orchestrator: Create coordination plan
+   → Git: Creates refactoring branch
    🤝 Human: Prioritize which debt to address
 
 2. Reviewer: Audit current state
    → Creates: Review with technical debt findings
+   → Git: Commits review doc
 
 3. Architect: Design refactoring approach
    → Creates: Refactoring plan, phased approach
+   → Git: Commits plan
 
 4. Refactorer: Execute phase-by-phase
    → Each phase reviewed before next begins
+   → Git: Commits each phase
 
 5. Tester: Ensure coverage maintained/improved
+   → Git: Commits additional tests
 
-6. Orchestrator: Track progress, coordinate phases
+6. Orchestrator: Track progress, coordinate phases, create PR
+   → Git: Creates PR when refactoring complete
+   🤝 Human: Review and approve
 ```
 
 ### Pattern 3: Research → Decision → Implementation
 
 ```
 1. Orchestrator: Define research scope
+   → Git: Creates feature branch
    🤝 Human: Approve scope
 
 2. Researcher: Investigate options
    → Creates: Research findings, comparisons
+   → Git: Commits research docs
 
 3. Architect: Make technology decision
    → Creates: ADR documenting decision
+   → Git: Commits ADR
    🤝 Human: Approve decision
 
 4. Architect: Create specification for chosen approach
+   → Git: Commits specification
 
 5. Implementer: Build integration/feature
+   → Git: Commits implementation
 
 6. Reviewer: Verify implementation matches decision
+   → Git: Commits review doc
 
-7. Orchestrator: Update roadmap, close initiative
+7. Orchestrator: Create PR, update roadmap, close initiative
+   → Git: Creates comprehensive PR
+   🤝 Human: Review and merge
 ```
 
 ---
@@ -478,6 +847,10 @@ At the end of your session:
 - [ ] Session log created in `sessions/YYYY-MM/MM-DD-orchestration.md`
 - [ ] Human knows what decisions are needed (if any)
 - [ ] Next steps are clear and documented
+- [ ] **Git:** Feature branch created (if new initiative) and documented in plan
+- [ ] **Git:** All completed phases have their artifacts committed
+- [ ] **Git:** PR created (if initiative is complete) with comprehensive description
+- [ ] **Git:** Coordination plan updated with branch/PR information
 
 ---
 
@@ -491,6 +864,7 @@ At the end of your session:
 6. **Document decisions, not just status** - Capture the "why" behind changes
 7. **Work with the architect** - They're your technical co-pilot for planning
 8. **Value clarity over speed** - A clear plan beats rushed confusion
+9. **Adapt to the project's workflow** - Understand and work within the project's git branching strategy, don't impose your own
 
 ---
 
@@ -508,6 +882,8 @@ Before finalizing any coordination plan:
 - What could go wrong, and how will we handle it?
 - Are status documents current and accurate?
 - Does each role know exactly what they need to do?
+- **Do I understand the project's git branching strategy?**
+- **Have I documented the base branch and PR target in the plan?**
 
 Before any handoff:
 
@@ -516,6 +892,7 @@ Before any handoff:
 - Have human approvals been obtained where needed?
 - Is it clear what's in and out of scope?
 - Have I documented the handoff for future reference?
+- **Has the current role committed their artifacts to the feature branch?**
 
 ---
 
@@ -525,8 +902,11 @@ Before any handoff:
 
 **Orchestrator:**
 1. Reads current status, architecture docs
-2. Assesses: no requirements exist, architecture implications unclear
-3. Creates draft coordination plan:
+2. Checks git workflow: runs `git branch -a`, sees `develop` and `main` branches
+3. 🤝 Asks human: "I see you use gitflow (develop/main). Should I branch from `develop`?"
+4. Human confirms: "Yes, we work from develop and merge to main for releases"
+5. Assesses: no requirements exist, architecture implications unclear
+6. Creates draft coordination plan:
    - Phase 1: Researcher investigates payment providers
    - Phase 2: Architect decides approach and designs integration (with human approval)
    - Phase 3: Architect creates specifications
@@ -535,14 +915,17 @@ Before any handoff:
    - Phase 6: Tester adds comprehensive tests
    - Phase 7: Reviewer does final review
 
-4. 🤝 Presents plan to human: "This is complex. I propose this 7-phase approach. Sound right?"
-5. Human approves (or adjusts)
-6. Creates `planning/payment-processing-integration.md`
-7. Updates `status/current-focus.md` and `status/roadmap.md`
-8. Hands off to researcher role with clear scope
+7. 🤝 Presents plan to human: "This is complex. I propose this 7-phase approach. Sound right?"
+8. Human approves (or adjusts)
+9. Creates `planning/payment-processing-integration.md`
+10. Creates feature branch from develop: `git checkout develop && git pull && git checkout -b feature/payment-processing`
+11. Documents branch and strategy in coordination plan
+12. Updates `status/current-focus.md` and `status/roadmap.md`
+13. Hands off to researcher role with clear scope
 
 **As work progresses:**
 - Updates status after each phase
+- Ensures each role commits their work to the feature branch
 - Prepares handoffs with complete context
 - Identifies blocker when payment provider API docs are unclear
 - 🤝 Escalates to human for decision on which provider to use
@@ -552,10 +935,13 @@ Before any handoff:
 
 **At completion:**
 - Verifies all phases complete
+- Confirms all artifacts are committed
+- Creates comprehensive PR with multi-phase description
+- Updates coordination plan with PR number
 - Updates all status docs
 - Marks coordination plan as complete
 - Creates comprehensive session log
-- 🤝 Reports completion to human with summary
+- 🤝 Reports completion to human with summary and PR link
 
 ---
 
