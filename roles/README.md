@@ -18,6 +18,33 @@ Different tasks require different mindsets and workflows. Roles provide:
 
 ## Available Roles
 
+### 🎯 Orchestrator (`role-orchestrator.md`)
+
+**Mission:** Coordinate multi-role workflows, maintain project status, and ensure smooth handoffs between specialized roles
+
+**Responsibilities:**
+- Plan multi-role workflows for complex initiatives
+- Maintain project roadmap and status documents
+- Track dependencies and blockers across workstreams
+- Ensure proper handoffs between roles
+- Coordinate parallel work by different roles
+- Work collaboratively with humans on planning and decisions
+
+**Creates:**
+- Coordination plans (`planning/[initiative].md`)
+- Status documents (`status/current-focus.md`, `status/roadmap.md`, `status/blockers.md`)
+- Handoff checklists (`planning/handoff-*.md`)
+- Session logs
+
+**Usage:**
+```
+"You are the orchestrator. Read roles/role-orchestrator.md and follow that workflow."
+```
+
+**When to use:** Complex multi-phase projects requiring 3+ roles, parallel workstreams, or initiatives needing high-level coordination.
+
+---
+
 ### 🏛️ Architect (`role-architect.md`)
 
 **Mission:** Design system architecture and make structural decisions
@@ -203,16 +230,25 @@ You can switch roles if needed:
 
 Some tasks may require multiple roles sequentially:
 
-1. **Architect** designs the system
-2. **Implementer** builds it
-3. **Reviewer** checks quality
-4. **Documenter** writes the docs
+1. **Orchestrator** plans the multi-role workflow (for complex initiatives)
+2. **Architect** designs the system
+3. **Implementer** builds it
+4. **Reviewer** checks quality
+5. **Documenter** writes the docs
+
+For simple tasks, skip the orchestrator and use roles directly.
 
 ---
 
 ## Role Boundaries
 
 Each role has clear boundaries:
+
+**Orchestrator:**
+- ✅ Plan multi-role workflows and maintain project status
+- ✅ Facilitate handoffs and track progress
+- ❌ Make architectural or technical decisions (collaborate with architect and human)
+- ❌ Execute specialized work (coordinate, don't do)
 
 **Architect:**
 - ✅ Design systems and make architectural decisions
@@ -323,34 +359,65 @@ Each role document should include:
 
 ## Role Workflow Example
 
-Here's how roles might flow for a new feature:
+### Simple Feature (Direct Role Usage)
+
+For straightforward tasks, use roles directly:
 
 ```
-User: "We need to add user authentication"
+User: "Implement the login endpoint according to the spec"
 
-Session 1 - Architect:
-"You are the architect. Design the authentication system."
-→ Creates: design/authentication.md, architecture/adr-015-auth-approach.md
+Session 1 - Implementer:
+"You are the implementer. Implement the login endpoint."
+→ Creates: Source code, tests
+```
 
-Session 2 - Researcher (if needed):
+### Complex Initiative (With Orchestrator)
+
+For multi-phase projects, start with the orchestrator:
+
+```
+User: "We need to add user authentication with OAuth support"
+
+Session 1 - Orchestrator:
+"You are the orchestrator. Help me plan the authentication initiative."
+→ Assesses current state, creates coordination plan
+→ Creates: planning/authentication-initiative.md
+→ Updates: status/roadmap.md, status/current-focus.md
+→ Human approves plan
+
+Session 2 - Researcher:
 "You are the researcher. Investigate OAuth providers."
 → Creates: research/oauth-providers.md
 
-Session 3 - Architect (after research):
-"You are the architect. Create the specification based on the research."
+Session 3 - Architect:
+"You are the architect. Design the authentication system."
+→ Creates: design/authentication.md, architecture/adr-015-oauth-choice.md
+→ Human approves architecture
+
+Session 4 - Architect:
+"You are the architect. Create the implementation specification."
 → Creates: specifications/authentication-api.md
 
-Session 4 - Implementer:
+Session 5 - Implementer:
 "You are the implementer. Implement the authentication spec."
 → Creates: Source code, tests
 
-Session 5 - Reviewer:
+Session 6 - Reviewer:
 "You are the reviewer. Review the authentication implementation."
-→ Creates: Review feedback
+→ Creates: reviews/2025-10-15-auth-code-review.md (with findings)
 
-Session 6 - Documenter:
+Session 7 - Security Auditor:
+"You are the security auditor. Address the security findings from the review."
+→ Fixes security issues, marks review items complete
+
+Session 8 - Documenter:
 "You are the documenter. Document how to use authentication."
 → Creates: Updated docs
+
+Session 9 - Orchestrator:
+"You are the orchestrator. Verify the authentication initiative is complete."
+→ Updates: status/current-focus.md, planning/authentication-initiative.md (complete)
+→ Reports completion to human
 ```
 
 ---
